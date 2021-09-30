@@ -17,7 +17,7 @@ setwd("D:\\Dropbox\\pollster.ge\\Geo Local 2021\\polls")
 ### (incorporates election results and all publicly available opinion polls)
 ### First set up full data
 
-polls <- read_excel("Parliamentary-2020_Local_2021_exitpolls-updated_09.09.2021.xlsx", sheet = "data")%>%
+polls <- read_excel("Parliamentary-2020_Local_2021_exitpolls-updated_09.28.2021.xlsx", sheet = "data")%>%
   # This filters out elections: 
   # filter(!WAVEID %in% c("W1", "W5"))%>%
   filter(!PARTYCODE %in% c("DK",
@@ -186,7 +186,7 @@ girchi <- predict_value("GIRCHI")  %>%data.frame()  %>% mutate(party = "Girchi")
 labor <- predict_value("LABOR")  %>%data.frame()  %>% mutate(party = "Labor")
 apg <- predict_value("APG")  %>%data.frame()  %>% mutate(party = "APG")
 agmashenebeli <- predict_value("NEWGEORGIA")  %>%data.frame()  %>% mutate(party = "Aghmashenebeli")
-civicmo <- predict_value("CIVICMO")  %>%data.frame()  %>% mutate(party = "Mokalakeebi")
+# civicmo <- predict_value("CIVICMO")  %>%data.frame()  %>% mutate(party = "Mokalakeebi")
 
 parties <- rbind(gd, unm, lelo, eurogeo, girchi, labor, apg, agmashenebeli)
 
@@ -264,6 +264,9 @@ agmashenebeli <- predit_bayes("NEWGEORGIA")  %>%data.frame()  %>% mutate(party =
 civicmo <- predit_bayes("CIVICMO")  %>%data.frame()  %>% mutate(party = "Mokalakeebi")
 
 parties_bayes <- rbind(gd, unm, lelo, eurogeo, girchi, labor, apg, agmashenebeli, civicmo) %>%
+  setNames(., c("pred", "party"))
+
+parties_bayes <- rbind(gd, unm) %>%
   setNames(., c("pred", "party"))
 
 write.csv(parties_bayes)

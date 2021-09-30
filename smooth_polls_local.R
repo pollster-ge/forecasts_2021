@@ -35,7 +35,7 @@ theme_ef <- function () {
 ### (incorporates election results and all publicly available opinion polls)
 ### First set up full data
 
-polls <- read_excel("Parliamentary-2020_Local_2021_exitpolls-updated_09.09.2021.xlsx", sheet = "data")%>%
+polls <- read_excel("Parliamentary-2020_Local_2021_exitpolls-updated_09.28.2021.xlsx", sheet = "data")%>%
   # This filters out elections: 
   # filter(!WAVEID %in% c("W1", "W5"))%>%
   filter(!PARTYCODE %in% c("DK",
@@ -113,7 +113,7 @@ polls %>%
 
 ### Change this
 
-today <- "2021-09-21"
+today <- "2021-10-02"
 
 ### Weighted sum by date
 
@@ -200,10 +200,13 @@ predict_value <- function(x) {
     year = lubridate::year(party_subset$field_last_day[nrow(party_subset)]),
     month = lubridate::month(party_subset$field_last_day[nrow(party_subset)]),
     day = lubridate::day(party_subset$field_last_day[nrow(party_subset)]),
-    time = as.numeric(party_subset$time[nrow(party_subset)]),
+    # time = as.numeric(party_subset$time[nrow(party_subset)]),
+    time = as.numeric(as.Date(today)),
     rate = as.numeric(party_subset$rate[nrow(party_subset)]),
     new_cases = as.numeric(party_subset$new_cases[nrow(party_subset)]),
     new_deaths = as.numeric(party_subset$new_deaths[nrow(party_subset)]),
+    # new_cases = as.numeric(2000),
+    # new_deaths = as.numeric(35),
     inflation = as.numeric(party_subset$inflation[nrow(party_subset)]),
     Polling_initiative="Edison Research / Formula",
     mode = "f2f"
@@ -231,10 +234,13 @@ predict_small <- function(x) {
     year = lubridate::year(party_subset$field_last_day[nrow(party_subset)]),
     month = lubridate::month(party_subset$field_last_day[nrow(party_subset)]),
     day = lubridate::day(party_subset$field_last_day[nrow(party_subset)]),
-    time = as.numeric(party_subset$time[nrow(party_subset)]),
+    # time = as.numeric(party_subset$time[nrow(party_subset)]),
+    time = as.numeric(as.Date(today)),
     rate = as.numeric(party_subset$rate[nrow(party_subset)]),
     new_cases = as.numeric(party_subset$new_cases[nrow(party_subset)]),
     new_deaths = as.numeric(party_subset$new_deaths[nrow(party_subset)]),
+    # new_cases = as.numeric(2000),
+    # new_deaths = as.numeric(35),
     inflation = as.numeric(party_subset$inflation[nrow(party_subset)]),
     Polling_initiative="Edison Research / Formula",
     mode = "f2f"
@@ -254,8 +260,9 @@ apg <- predict_value("APG")  %>%data.frame()  %>% mutate(party = "APG")
 agmashenebeli <- predict_value("NEWGEORGIA")  %>%data.frame()  %>% mutate(party = "Third Way - Aghmashenebeli")
 civicmo <- predict_value("CIVICMO")  %>%data.frame()  %>% mutate(party = "Mokalakeebi")
 forgeo <- predict_small("FORGEO")  %>%data.frame()  %>% mutate(party = "For Georgia")
+forpeople <- predict_small("FORPEOPLE")  %>%data.frame()  %>% mutate(party = "For People")
 
-parties <- rbind(gd, unm, lelo, eurogeo, girchi, labor, apg, agmashenebeli, civicmo, forgeo)
+parties <- rbind(gd, unm, lelo, eurogeo, girchi, labor, apg, agmashenebeli, civicmo, forgeo, forpeople)
 
 write.csv(parties)
 
@@ -264,11 +271,9 @@ parties %>%
   mutate(party=forcats::fct_reorder(party, fit))%>%
   ggplot(aes(fit, party, fill=party, label=round(fit*100, 0)))+
   geom_col_interactive(aes(tooltip=paste0(party, ": ", round(fit*100, 0), "%")))+
-  # geom_linerange(aes(xmin=fit-se.fit*1.96, xmax=fit+se.fit*1.96),
-  #               position = position_stack())+
   geom_text(position = position_stack(vjust = 0.5), family="FiraGO", color= "white",size=4, fontface = "bold")+
-  scale_fill_manual(values=rev(c("#195ea2", "#dc082b", "#250244", "#e1073b","#327f37","#e7b031",
-                                 "#f0ce0d", "#fc5000", "#0f5cbb", "#8ac650")))+
+  scale_fill_manual(values=rev(c("#195ea2", "#dc082b", "#250244", "#f0ce0d", "#e1073b", "#327f37", "#ea6b24",
+                                 "#0f5cbb", "#fc5000", "#e7b031", "#8ac650")))+
   theme_ef() -> polling_model
 
 polling_model
@@ -284,9 +289,9 @@ htmlwidgets::saveWidget(gg_a, "D:\\Dropbox\\pollster.ge\\Geo Local 2021\\polls\\
 parties %>%
   mutate(
     party = factor(party, levels=c("GD", "UNM", "Lelo", "European Georgia", "Girchi", "Labor", "APG", "Third Way - Aghmashenebeli",
-                                   "Mokalakeebi", "For Georgia"),
+                                   "Mokalakeebi", "For Georgia", "For People"),
                    labels = c("ქართული ოცნება", "ენმ", "ლელო", "ევროპული საქართველო", "გირჩი", "ლეიბორისტები",
-                              "პატრიოტთა ალიანსი", "მესამე გზა-აღმაშენებელი", "მოქალაქეები", "საქართველოსთვის")),
+                              "პატრიოტთა ალიანსი", "მესამე გზა-აღმაშენებელი", "მოქალაქეები", "საქართველოსთვის", "ხალხისთვის")),
     party=forcats::fct_reorder(party, fit),
          )%>%
   ggplot(aes(fit, party, fill=party, label=round(fit*100, 0)))+
@@ -294,8 +299,8 @@ parties %>%
   # geom_linerange(aes(xmin=fit-se.fit*1.96, xmax=fit+se.fit*1.96),
   #               position = position_stack())+
   geom_text(position = position_stack(vjust = 0.5), family="FiraGO", color= "white",size=4, fontface = "bold")+
-  scale_fill_manual(values=rev(c("#195ea2", "#dc082b", "#250244", "#e1073b","#327f37","#e7b031",
-                                 "#f0ce0d", "#fc5000", "#0f5cbb", "#8ac650")))+
+  scale_fill_manual(values=rev(c("#195ea2", "#dc082b", "#250244", "#f0ce0d", "#e1073b", "#327f37", "#ea6b24",
+                                 "#0f5cbb", "#fc5000", "#e7b031", "#8ac650")))+
   theme_ef() -> polling_model
 
 polling_model
@@ -309,14 +314,14 @@ htmlwidgets::saveWidget(gg_a, "D:\\Dropbox\\pollster.ge\\Geo Local 2021\\polls\\
 
 ## EN trends
 polls_wt%>%
-  filter(PARTYCODE %in% c("GD", "UNM", "FORGEO", "LABOR", "GIRCHI", "APG", "LELO") & field_last_day >= "2018-10-01") %>%
-  mutate(PARTYCODE = factor(PARTYCODE, levels=c("GD", "UNM", "FORGEO", "LABOR", "GIRCHI", "APG", "LELO"),
-                            labels = c("Georgian Dream", "UNM","For Georgia", "Labor", "Girchi (More Freedom)", "Alliance of Patriots", "Lelo")))%>%
+  filter(PARTYCODE %in% c("GD", "UNM", "FORGEO", "LABOR", "GIRCHI", "LELO") & field_last_day >= "2018-10-01") %>%
+  mutate(PARTYCODE = factor(PARTYCODE, levels=c("GD", "UNM", "FORGEO", "LABOR", "GIRCHI", "LELO"),
+                            labels = c("Georgian Dream", "UNM","For Georgia", "Labor", "Girchi (More Freedom)", "Lelo")))%>%
   ggplot(aes(as.Date(field_last_day),  proportion, group=PARTYCODE, color=PARTYCODE, fill=PARTYCODE))+
     geom_smooth(method="gam", formula = y~s(x, k=5, bs = "cs", fx=T), alpha=0.2)+
   scale_y_continuous(labels = scales::percent_format(accuracy = 1), limits = c(0, 1))+
-  scale_color_manual(values = c("#195ea2", "#dc082b", "#250244", "#e1073b", "#327f37", "#e7b031", "#f0ce0d"))+
-  scale_fill_manual(values = c("#195ea2", "#dc082b", "#250244", "#e1073b", "#327f37", "#e7b031", "#f0ce0d"))+
+  scale_color_manual(values = c("#195ea2", "#dc082b", "#250244", "#e1073b", "#327f37", "#f0ce0d"))+
+  scale_fill_manual(values = c("#195ea2", "#dc082b", "#250244", "#e1073b", "#327f37", "#f0ce0d"))+
   geom_vline(xintercept=as.Date("2020-10-31"),
              color="black", linetype = "longdash")+
   annotate("text", x=as.Date("2020-10-20"), y=0.8, angle=90, 
@@ -333,6 +338,14 @@ polls_wt%>%
              color="black", linetype = "longdash")+
   annotate("text", x=as.Date("2021-07-18"), y=0.7, angle=90, 
            label="GD leaves Charles Michel Agreement", family = "FiraGO")+
+  geom_vline(xintercept=as.Date("2021-09-13"),
+             color="black", linetype = "longdash")+
+  annotate("text", x=as.Date("2021-09-03"), y=0.7, angle=90, 
+           label="SSS leaks", family = "FiraGO")+
+  geom_hline(yintercept=0.43,
+             color="black", linetype = "longdash")+
+  annotate("text", x=as.Date("2020-01-01"), y=0.45,
+           label="43% threshold as per Charles Michel agreement", family = "FiraGO")+
   geom_point_interactive(aes(tooltip=paste0(PARTYCODE, ": ", round(proportion*100, 0), "%\n", Polling_initiative, "; ", Date)))+
   theme_ef()+
   theme(
@@ -375,6 +388,14 @@ polls_wt%>%
              color="black", linetype = "longdash")+
   annotate("text", x=as.Date("2021-07-18"), y=0.7, angle=90, 
            label="ოცნება ტოვებს მიშელის შეთანხმებას", family = "FiraGO")+
+  geom_vline(xintercept=as.Date("2021-09-13"),
+             color="black", linetype = "longdash")+
+  annotate("text", x=as.Date("2021-09-03"), y=0.7, angle=90, 
+           label="სუს-ის ფაილების გაჟონვა", family = "FiraGO")+
+  geom_hline(yintercept=0.43,
+             color="black", linetype = "longdash")+
+  annotate("text", x=as.Date("2020-01-01"), y=0.45,
+           label="შარლ მიშელის შეთანხმების 43%-იანი ბარიერის დათქმა", family = "FiraGO")+
   geom_point_interactive(aes(tooltip=paste0(PARTYCODE, ": ", round(proportion*100, 0), "%\n", Polling_initiative, "; ", Date)))+
   theme_ef()+
   theme(
